@@ -6,6 +6,7 @@ import Auth from './pages/Auth';
 import AuthCallback from './pages/AuthCallback';
 import Dashboard from './pages/Dashboard';
 import Board from './pages/Board';
+import JoinBoard from './pages/JoinBoard';
 
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -36,6 +37,7 @@ const App = () => {
             </ProtectedRoute>
           } 
         />
+        <Route path="/join/:code" element={<JoinBoard />} />
 
         {/* Catch-all redirect */}
         <Route path="*" element={<Navigate to="/" />} />

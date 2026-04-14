@@ -1,9 +1,22 @@
-import React from 'react';
-import { ArrowLeft, Users, MoreVertical, Share2, Download } from 'lucide-react';
+import React, { useState } from 'react';
+import { ArrowLeft, Users, MoreVertical, Share2, Download, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
-const TopBar = ({ title }) => {
+const TopBar = ({ board }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleShare = () => {
+    if (!board) return;
+    const shareUrl = `${window.location.origin}/join/${board.shareCode}`;
+    navigator.clipboard.writeText(shareUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const members = board?.members || [];
+  const showMembers = members.slice(0, 3);
+  const extraMembers = members.length - 3;
   return (
     <motion.div 
       initial={{ y: -50, opacity: 0 }}
@@ -16,24 +29,37 @@ const TopBar = ({ title }) => {
         </Link>
         <div className="w-px h-6 bg-white/10" />
         <h1 className="text-white font-semibold text-sm tracking-wide cursor-pointer hover:bg-white/5 px-2 py-1 rounded transition-colors">
-          {title || 'Untitled Board'}
+          {board?.title || 'Untitled Board'}
         </h1>
       </div>
 
       <div className="flex items-center gap-3 bg-[#1e293b]/90 backdrop-blur-xl border border-white/10 px-4 py-2 rounded-2xl shadow-xl">
         <div className="flex items-center -space-x-2 mr-2 cursor-pointer relative group">
-          {/* Mock active users avatars */}
-          <div className="w-8 h-8 rounded-full border-2 border-[#1e293b] bg-emerald-500 flex items-center justify-center text-xs font-bold text-white z-20">A</div>
-          <div className="w-8 h-8 rounded-full border-2 border-[#1e293b] bg-indigo-500 flex items-center justify-center text-xs font-bold text-white z-10">B</div>
-          <div className="w-8 h-8 rounded-full border-2 border-[#1e293b] bg-[#0f172a] flex items-center justify-center text-xs font-bold text-slate-400 z-0">+2</div>
+          {showMembers.map((m, i) => (
+            <div key={m.id} className="w-8 h-8 rounded-full border-2 border-[#1e293b] bg-slate-700 flex items-center justify-center text-xs font-bold text-white z-20 overflow-hidden" style={{ zIndex: 30 - i }}>
+              {m.user?.avatarUrl ? (
+                <img src={m.user.avatarUrl} alt="" className="w-full h-full object-cover" />
+              ) : (
+                m.user?.username?.charAt(0).toUpperCase() || 'U'
+              )}
+            </div>
+          ))}
+          {extraMembers > 0 && (
+            <div className="w-8 h-8 rounded-full border-2 border-[#1e293b] bg-[#0f172a] flex items-center justify-center text-xs font-bold text-slate-400 z-0">
+              +{extraMembers}
+            </div>
+          )}
           <Users className="w-4 h-4 ml-4 text-slate-400 group-hover:text-white transition-colors" />
         </div>
         
         <div className="w-px h-6 bg-white/10" />
         
-        <button className="flex items-center gap-2 bg-sky-500 hover:bg-sky-400 text-white px-4 py-1.5 rounded-xl font-medium text-sm transition-all shadow-lg shadow-sky-500/20">
-          <Share2 className="w-4 h-4" />
-          Share
+        <button 
+          onClick={handleShare}
+          className="flex items-center gap-2 bg-sky-500 hover:bg-sky-400 text-white px-4 py-1.5 rounded-xl font-medium text-sm transition-all shadow-lg shadow-sky-500/20"
+        >
+          {copied ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
+          {copied ? 'Copied' : 'Share'}
         </button>
 
         <button className="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-white/5 transition-all">

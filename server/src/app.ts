@@ -3,6 +3,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth';
+import boardRoutes from './routes/boards';
 import { authRateLimiter } from './middleware/rateLimiter';
 
 dotenv.config();
@@ -20,6 +21,7 @@ app.use(cors({
 
 // Routes
 app.use('/api/auth', authRateLimiter, authRoutes);
+app.use('/api/boards', boardRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
