@@ -65,20 +65,69 @@ const Dashboard = () => {
             <h1 className="text-3xl font-bold tracking-tight">My Boards</h1>
             <p className="text-slate-400 text-sm mt-1">Manage and collaborate on your ideas.</p>
           </div>
-          <button className="bg-sky-500 hover:bg-sky-400 text-white font-bold py-3 px-6 rounded-xl flex items-center gap-2 shadow-lg shadow-sky-500/25 transition-all">
-            <Plus className="w-5 h-5" />
-            New Board
-          </button>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center bg-[#1e293b]/50 border border-white/5 rounded-lg p-1 hidden sm:flex">
+              <button className="p-1.5 bg-white/10 rounded shadow-sm text-white">
+                <Grid className="w-4 h-4" />
+              </button>
+              <button className="p-1.5 text-slate-400 hover:text-white transition-colors">
+                <List className="w-4 h-4" />
+              </button>
+            </div>
+            <button className="bg-sky-500 hover:bg-sky-400 text-white font-bold py-2.5 px-5 rounded-xl flex items-center gap-2 shadow-lg shadow-sky-500/25 transition-all text-sm">
+              <Plus className="w-4 h-4" />
+              New Board
+            </button>
+          </div>
         </div>
 
-        {/* Empty State / Placeholder Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          <div className="aspect-video bg-white/5 border border-dashed border-white/10 rounded-3xl flex flex-col items-center justify-center p-8 group cursor-pointer hover:border-sky-500/30 transition-all">
-            <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-4 group-hover:bg-sky-500/10 transition-all">
-              <Plus className="w-6 h-6 text-slate-500 group-hover:text-sky-400 transition-all" />
+          {/* New Board Card */}
+          <div className="aspect-video bg-sky-500/5 border border-dashed border-sky-500/30 rounded-3xl flex flex-col items-center justify-center p-8 group cursor-pointer hover:bg-sky-500/10 hover:border-sky-500/50 transition-all">
+            <div className="w-12 h-12 rounded-full bg-sky-500/10 flex items-center justify-center mb-4 group-hover:bg-sky-500/20 group-hover:scale-110 transition-all duration-300">
+              <Plus className="w-6 h-6 text-sky-500" />
             </div>
-            <p className="text-slate-500 text-sm font-medium">Create your first board</p>
+            <p className="text-sky-500 text-sm font-semibold">Start from scratch</p>
           </div>
+
+          {/* Mock Board Cards */}
+          {[
+            { id: '1', title: 'Sprint Retrospective', updated: '2 hours ago', members: 4, color: 'bg-emerald-500' },
+            { id: '2', title: 'Product Architecture', updated: 'Yesterday', members: 2, color: 'bg-indigo-500' },
+            { id: '3', title: 'Marketing Campaign', updated: '3 days ago', members: 5, color: 'bg-rose-500' },
+          ].map((board) => (
+            <div key={board.id} className="bg-[#1e293b]/50 border border-white/5 rounded-3xl overflow-hidden hover:border-white/10 hover:bg-[#1e293b]/80 transition-all cursor-pointer group flex flex-col">
+              <div className="h-32 bg-[#0f172a] relative overflow-hidden flex items-center justify-center border-b border-white/5">
+                <div className={`absolute -inset-4 opacity-20 blur-2xl ${board.color}`}></div>
+                <Layout className="w-8 h-8 text-white/20 relative z-10 group-hover:scale-110 transition-transform duration-500" />
+              </div>
+              <div className="p-5 flex-1 flex flex-col justify-between">
+                <div>
+                  <div className="flex justify-between items-start mb-1">
+                    <h3 className="font-semibold text-white/90 truncate pr-2">{board.title}</h3>
+                    <button className="text-slate-500 hover:text-white p-1 -mr-2 -mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <MoreVertical className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <p className="text-xs text-slate-500">Edited {board.updated}</p>
+                </div>
+                <div className="flex items-center justify-between mt-4">
+                  <div className="flex -space-x-2">
+                    {[...Array(Math.min(board.members, 3))].map((_, i) => (
+                      <div key={i} className="w-6 h-6 rounded-full bg-slate-700 border-2 border-[#1e293b] flex items-center justify-center text-[8px] font-bold">
+                        {String.fromCharCode(65 + i)}
+                      </div>
+                    ))}
+                    {board.members > 3 && (
+                      <div className="w-6 h-6 rounded-full bg-[#0f172a] border-2 border-[#1e293b] flex items-center justify-center text-[8px] font-bold text-slate-400">
+                        +{board.members - 3}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </main>
     </div>

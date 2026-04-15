@@ -5,6 +5,7 @@ import Landing from './pages/Landing';
 import Auth from './pages/Auth';
 import AuthCallback from './pages/AuthCallback';
 import Dashboard from './pages/Dashboard';
+import Board from './pages/Board';
 
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -24,6 +25,14 @@ const App = () => {
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/board/:id" 
+          element={
+            <ProtectedRoute>
+              <Board />
             </ProtectedRoute>
           } 
         />
