@@ -5,6 +5,7 @@ import { useBoardStore } from '../store/boardStore';
 import TopBar from '../components/board/TopBar';
 import Toolbar from '../components/board/Toolbar';
 import StatusBar from '../components/board/StatusBar';
+import Canvas from '../components/board/Canvas';
 
 const Board = () => {
   const { id } = useParams();
@@ -48,10 +49,7 @@ const Board = () => {
       <TopBar board={currentBoard} />
       <Toolbar activeTool={activeTool} setActiveTool={setActiveTool} />
       
-      {/* The Actual Canvas Component will go here */}
-      <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
-        <p className="text-slate-600 text-sm">Canvas Engine (Rough.js) will be mounted here.</p>
-      </div>
+      <Canvas boardId={id} activeTool={activeTool} />
 
       <StatusBar zoom={100} />
     </div>

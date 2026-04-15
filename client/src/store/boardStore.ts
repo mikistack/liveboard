@@ -4,8 +4,19 @@ import api from '../lib/api';
 export const useBoardStore = create((set, get) => ({
   boards: [],
   currentBoard: null,
+  elements: [],
   isLoading: false,
   error: null,
+
+  setElements: (elements) => set({ elements }),
+  
+  addElement: (element) => set((state) => ({ 
+    elements: [...state.elements, element] 
+  })),
+
+  updateElement: (id, updates) => set((state) => ({
+    elements: state.elements.map((el) => el.id === id ? { ...el, ...updates } : el)
+  })),
 
   fetchBoards: async () => {
     set({ isLoading: true, error: null });
