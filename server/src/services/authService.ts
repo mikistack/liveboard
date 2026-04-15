@@ -65,3 +65,36 @@ export const loginUser = async (data: any) => {
 
   return { user, accessToken, refreshToken };
 };
+
+export const upsertGoogleUser = async (profile: { email: string, name: string, picture?: string, sub: string }) => {
+  let user = await prisma.user.findUnique({
+    where: { email: profile.email },
+  });
+
+  if (!user) {
+    user = await prisma.user.create({
+      data: {
+        email: profile.email,
+        username: profile.email.split('@')[0] + Math.random().toString(36).substring(7),
+        avatarUrl: profile.picture,
+        oauthProvider: 'google',
+        oauthId: profile.sub,
+      },
+    });
+  } else if (!user.oauthProvider) {
+    // If user existed via email/password, link the google account
+    user = await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        oauthProvider: 'google',
+        oauthId: profile.sub,
+        avatarUrl: user.avatarUrl || profile.picture,
+      },
+    });
+  }
+
+  const accessToken = generateAccessToken(user.id);
+  const refreshToken = generateRefreshToken(user.id);
+
+  return { user, accessToken, refreshToken };
+};
