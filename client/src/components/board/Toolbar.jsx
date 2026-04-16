@@ -4,12 +4,11 @@ import { motion } from 'framer-motion';
 
 const tools = [
   { id: 'select', icon: MousePointer2, label: 'Select (V)' },
-  { id: 'freehand', icon: Pencil, label: 'Draw (D)' },
+  { id: 'pencil', icon: Pencil, label: 'Pencil (P)' },
   { id: 'rectangle', icon: Square, label: 'Rectangle (R)' },
   { id: 'circle', icon: Circle, label: 'Circle (O)' },
-  { id: 'arrow', icon: ArrowRight, label: 'Arrow (A)' },
   { id: 'line', icon: Minus, label: 'Line (L)' },
-  { id: 'sticky', icon: StickyNote, label: 'Sticky Note (S)' },
+  { id: 'arrow', icon: ArrowRight, label: 'Arrow (A)' },
   { id: 'text', icon: Type, label: 'Text (T)' },
 ];
 
