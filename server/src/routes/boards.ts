@@ -1,6 +1,5 @@
-import { Router } from 'express';
 import { authenticate, AuthRequest } from '../middleware/auth';
-import { createBoard, getUserBoards, getBoardById, renameBoard, deleteBoard, joinBoardByCode } from '../services/boardService';
+import { createBoard, getUserBoards, getBoardById, renameBoard, deleteBoard, joinBoardByCode, saveElements, getElements } from '../services/boardService';
 import { z } from 'zod';
 
 const router = Router();
@@ -29,12 +28,22 @@ router.get('/', async (req: AuthRequest, res) => {
   }
 });
 
-router.get('/:id', async (req: AuthRequest, res) => {
+router.get('/:id/elements', async (req: AuthRequest, res) => {
   try {
-    const board = await getBoardById(req.params.id, req.userId!);
-    res.status(200).json(board);
+    const elements = await getElements(req.params.id);
+    res.status(200).json(elements);
   } catch (error: any) {
-    res.status(error.message === 'Unauthorized access' ? 403 : 404).json({ message: error.message });
+    res.status(500).json({ message: 'Failed to fetch elements' });
+  }
+});
+
+router.post('/:id/elements', async (req: AuthRequest, res) => {
+  try {
+    const elements = req.body.elements; // Assuming simple array for now
+    await saveElements(req.params.id, elements);
+    res.status(200).json({ message: 'Elements saved' });
+  } catch (error: any) {
+    res.status(400).json({ message: error.message });
   }
 });
 

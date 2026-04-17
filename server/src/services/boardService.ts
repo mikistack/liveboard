@@ -127,3 +127,38 @@ export const joinBoardByCode = async (shareCode: string, userId: string) => {
 
   return board;
 };
+
+export const saveElements = async (boardId: string, elementsData: any[]) => {
+  // Clear and recreate for the demo's simplicity (standard for early-stage whiteboards)
+  await prisma.element.deleteMany({ where: { boardId } });
+  
+  const created = await Promise.all(
+    elementsData.map((el) => {
+      // Map frontend type to database enum
+      let enumType = 'FREEHAND';
+      if (el.type === 'rectangle') enumType = 'RECT';
+      else if (el.type === 'circle') enumType = 'CIRCLE';
+      else if (el.type === 'arrow') enumType = 'ARROW';
+      else if (el.type === 'line') enumType = 'LINE';
+
+      return prisma.element.create({
+        data: {
+          id: el.id,
+          boardId,
+          type: enumType as any,
+          data: el,
+          createdBy: 'system',
+        }
+      });
+    })
+  );
+  return created;
+};
+
+export const getElements = async (boardId: string) => {
+  const elements = await prisma.element.findMany({
+    where: { boardId },
+    orderBy: { createdAt: 'asc' },
+  });
+  return elements.map(e => e.data);
+};

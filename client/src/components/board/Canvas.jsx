@@ -13,6 +13,7 @@ const Canvas = ({ boardId, activeTool }) => {
   
   const elements = useBoardStore((state) => state.elements);
   const setElements = useBoardStore((state) => state.setElements);
+  const persistElements = useBoardStore((state) => state.persistElements);
   const socket = useSocket(boardId);
 
   // Helper to draw a single element
@@ -125,7 +126,7 @@ const Canvas = ({ boardId, activeTool }) => {
         points: selectedElement.points?.map(([px, py]) => [px + dx, py + dy])
       };
       
-      setElements(prev => prev.map(el => el.id === selectedElement.id ? updated : el));
+      setElements(prev => prev.map(el => el.id === selectedElement.id ? updated : el), true);
       socket?.emit('draw-element', { boardId, element: updated });
       return;
     }
@@ -147,7 +148,7 @@ const Canvas = ({ boardId, activeTool }) => {
       const next = [...prev];
       next[next.length - 1] = updated;
       return next;
-    });
+    }, true);
     
     socket?.emit('draw-element', { boardId, element: updated });
   };
@@ -155,6 +156,8 @@ const Canvas = ({ boardId, activeTool }) => {
   const handleMouseUp = () => {
     setIsDrawing(false);
     if (activeTool === 'select') setSelectedElement(null);
+    // Persist to database after drawing/moving
+    persistElements(boardId);
   };
 
   return (

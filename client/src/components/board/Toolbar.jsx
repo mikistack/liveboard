@@ -1,6 +1,6 @@
-import React from 'react';
 import { Pencil, Square, Circle, ArrowRight, Minus, StickyNote, Type, MousePointer2, Undo2, Redo2, Palette } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useBoardStore } from '../../store/boardStore';
 
 const tools = [
   { id: 'select', icon: MousePointer2, label: 'Select (V)' },
@@ -13,6 +13,8 @@ const tools = [
 ];
 
 const Toolbar = ({ activeTool, setActiveTool }) => {
+  const undo = useBoardStore((state) => state.undo);
+  const redo = useBoardStore((state) => state.redo);
   return (
     <div className="absolute left-6 top-1/2 -translate-y-1/2 flex flex-col gap-2 z-40">
       <motion.div 
@@ -51,10 +53,18 @@ const Toolbar = ({ activeTool, setActiveTool }) => {
         transition={{ delay: 0.1 }}
         className="bg-[#1e293b]/90 backdrop-blur-xl border border-white/10 rounded-2xl p-2 flex flex-col gap-1 shadow-2xl"
       >
-        <button className="p-3 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all flex items-center justify-center" title="Undo (Ctrl+Z)">
+        <button 
+          onClick={undo}
+          className="p-3 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all flex items-center justify-center" 
+          title="Undo (Ctrl+Z)"
+        >
           <Undo2 className="w-5 h-5" />
         </button>
-        <button className="p-3 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all flex items-center justify-center" title="Redo (Ctrl+Y)">
+        <button 
+          onClick={redo}
+          className="p-3 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all flex items-center justify-center" 
+          title="Redo (Ctrl+Y)"
+        >
           <Redo2 className="w-5 h-5" />
         </button>
       </motion.div>
