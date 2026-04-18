@@ -1,6 +1,7 @@
 import React, { useLayoutEffect, useState, useRef, useEffect } from 'react';
 import rough from 'roughjs';
 import { useBoardStore } from '../../store/boardStore';
+import { useAuthStore } from '../../store/authStore';
 import { useSocket } from '../../hooks/useSocket';
 
 const generator = rough.generator();
@@ -10,7 +11,9 @@ const Canvas = ({ boardId, activeTool }) => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [selectedElement, setSelectedElement] = useState(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [remoteCursors, setRemoteCursors] = useState({});
   
+  const user = useAuthStore((state) => state.user);
   const elements = useBoardStore((state) => state.elements);
   const setElements = useBoardStore((state) => state.setElements);
   const persistElements = useBoardStore((state) => state.persistElements);
@@ -54,6 +57,7 @@ const Canvas = ({ boardId, activeTool }) => {
 
   useEffect(() => {
     if (!socket) return;
+    
     socket.on('element-update', (newElement) => {
       setElements((prev) => {
         const index = prev.findIndex((el) => el.id === newElement.id);
@@ -63,11 +67,21 @@ const Canvas = ({ boardId, activeTool }) => {
         return updated;
       });
     });
-    return () => socket.off('element-update');
+
+    socket.on('user-cursor', ({ userId, username, x, y }) => {
+      setRemoteCursors((prev) => ({
+        ...prev,
+        [userId]: { username, x, y }
+      }));
+    });
+
+    return () => {
+      socket.off('element-update');
+      socket.off('user-cursor');
+    };
   }, [socket, setElements]);
 
   const getElementAt = (x, y) => {
-    // Simple AABB hit detection for Demo
     return [...elements].reverse().find(el => {
       if (el.type === 'pencil') {
         return el.points.some(([px, py]) => Math.abs(px - x) < 10 && Math.abs(py - y) < 10);
@@ -112,17 +126,19 @@ const Canvas = ({ boardId, activeTool }) => {
   const handleMouseMove = (e) => {
     const { clientX, clientY } = e;
 
+    // Broadcast cursor position
+    socket?.emit('cursor-move', { boardId, x: clientX, y: clientY, username: user?.username });
+
     if (activeTool === 'select' && selectedElement) {
-      // Dragging logic
       const dx = clientX - (selectedElement.x1 || selectedElement.points[0][0]) - dragOffset.x;
       const dy = clientY - (selectedElement.y1 || selectedElement.points[0][1]) - dragOffset.y;
       
       const updated = {
         ...selectedElement,
-        x1: selectedElement.x1 + dx,
-        y1: selectedElement.y1 + dy,
-        x2: selectedElement.x2 + dx,
-        y2: selectedElement.y2 + dy,
+        x1: (selectedElement.x1 || 0) + dx,
+        y1: (selectedElement.y1 || 0) + dy,
+        x2: (selectedElement.x2 || 0) + dx,
+        y2: (selectedElement.y2 || 0) + dy,
         points: selectedElement.points?.map(([px, py]) => [px + dx, py + dy])
       };
       
@@ -156,20 +172,37 @@ const Canvas = ({ boardId, activeTool }) => {
   const handleMouseUp = () => {
     setIsDrawing(false);
     if (activeTool === 'select') setSelectedElement(null);
-    // Persist to database after drawing/moving
     persistElements(boardId);
   };
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={window.innerWidth}
-      height={window.innerHeight}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      className={`absolute inset-0 z-10 touch-none ${activeTool === 'select' ? 'cursor-default' : 'cursor-crosshair'}`}
-    />
+    <div className="relative w-full h-full">
+      <canvas
+        ref={canvasRef}
+        width={window.innerWidth}
+        height={window.innerHeight}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        className={`absolute inset-0 z-10 touch-none ${activeTool === 'select' ? 'cursor-default' : 'cursor-crosshair'}`}
+      />
+      
+      {/* Remote Cursors Overlay */}
+      {Object.entries(remoteCursors).map(([userId, cursor]) => (
+        <div
+          key={userId}
+          className="absolute pointer-events-none z-50 transition-all duration-75"
+          style={{ left: cursor.x, top: cursor.y }}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" className="fill-indigo-500 drop-shadow-lg">
+            <path d="M5.653 3.123l12.433 12.432-5.013 1.154 3.122 5.617-1.897 1.054-3.122-5.617-4.226 3.84z" />
+          </svg>
+          <div className="bg-indigo-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap ml-4 mt-1 shadow-md">
+            {cursor.username}
+          </div>
+        </div>
+      ))}
+    </div>
   );
 };
 

@@ -56,8 +56,12 @@ export const setupSocket = (server: HttpServer) => {
 
     // Drawing Sync
     socket.on('draw-element', ({ boardId, element }) => {
-      // Broadcast the new/updated element to everyone else in the board room
       socket.to(boardId).emit('element-update', element);
+    });
+
+    // Cursor Presence
+    socket.on('cursor-move', ({ boardId, x, y, username }) => {
+      socket.to(boardId).emit('user-cursor', { userId, username, x, y });
     });
 
     socket.on('disconnect', () => {
