@@ -2,16 +2,38 @@ import React, { useState } from 'react';
 import { ArrowLeft, Users, MoreVertical, Share2, Download, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import api from '../../lib/api';
 
 const TopBar = ({ board }) => {
   const [copied, setCopied] = useState(false);
-
+  const [isEditing, setIsEditing] = useState(false);
+  const [title, setTitle] = useState(board?.title || '');
+  
   const handleShare = () => {
     if (!board) return;
     const shareUrl = `${window.location.origin}/join/${board.shareCode}`;
     navigator.clipboard.writeText(shareUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleDownload = () => {
+    const canvas = document.querySelector('canvas');
+    if (!canvas) return;
+    const link = document.createElement('a');
+    link.download = `${board?.title || 'board'}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  };
+
+  const handleRename = async () => {
+    if (!title.trim() || title === board.title) return setIsEditing(false);
+    try {
+      await api.patch(`/boards/${board.id}`, { title });
+      setIsEditing(false);
+    } catch (err) {
+      console.error('Rename failed', err);
+    }
   };
 
   const members = board?.members || [];
@@ -28,9 +50,23 @@ const TopBar = ({ board }) => {
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div className="w-px h-6 bg-white/10" />
-        <h1 className="text-white font-semibold text-sm tracking-wide cursor-pointer hover:bg-white/5 px-2 py-1 rounded transition-colors">
-          {board?.title || 'Untitled Board'}
-        </h1>
+        {isEditing ? (
+          <input
+            autoFocus
+            className="bg-transparent text-white font-semibold text-sm outline-none border-b border-sky-500"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            onBlur={handleRename}
+            onKeyDown={(e) => e.key === 'Enter' && handleRename()}
+          />
+        ) : (
+          <h1 
+            onClick={() => setIsEditing(true)}
+            className="text-white font-semibold text-sm tracking-wide cursor-pointer hover:bg-white/5 px-2 py-1 rounded transition-colors"
+          >
+            {title || board?.title || 'Untitled Board'}
+          </h1>
+        )}
       </div>
 
       <div className="flex items-center gap-3 bg-[#1e293b]/90 backdrop-blur-xl border border-white/10 px-4 py-2 rounded-2xl shadow-xl">
@@ -62,7 +98,11 @@ const TopBar = ({ board }) => {
           {copied ? 'Copied' : 'Share'}
         </button>
 
-        <button className="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-white/5 transition-all">
+        <button 
+          onClick={handleDownload}
+          className="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-white/5 transition-all"
+          title="Download PNG"
+        >
           <Download className="w-5 h-5" />
         </button>
 
