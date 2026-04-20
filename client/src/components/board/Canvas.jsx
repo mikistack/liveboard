@@ -15,6 +15,7 @@ const Canvas = ({ boardId, activeTool }) => {
   
   const user = useAuthStore((state) => state.user);
   const elements = useBoardStore((state) => state.elements);
+  const strokeColor = useBoardStore((state) => state.strokeColor);
   const setElements = useBoardStore((state) => state.setElements);
   const persistElements = useBoardStore((state) => state.persistElements);
   const socket = useSocket(boardId);
@@ -118,7 +119,7 @@ const Canvas = ({ boardId, activeTool }) => {
       x2: clientX,
       y2: clientY,
       points: [[clientX, clientY]],
-      stroke: '#38bdf8',
+      stroke: strokeColor,
     };
     setElements((prev) => [...prev, newElement]);
   };

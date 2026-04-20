@@ -7,8 +7,11 @@ export const useBoardStore = create((set, get) => ({
   elements: [],
   history: [], // Undo stack
   redoStack: [], // Redo stack
+  strokeColor: '#38bdf8', // Default sky-400
   isLoading: false,
   error: null,
+
+  setStrokeColor: (color) => set({ strokeColor: color }),
 
   setElements: (elements, skipHistory = false) => {
     if (!skipHistory) {
