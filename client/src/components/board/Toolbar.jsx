@@ -30,13 +30,13 @@ const Toolbar = ({ activeTool, setActiveTool }) => {
   const setStrokeColor = useBoardStore((state) => state.setStrokeColor);
 
   return (
-    <div className="absolute left-6 top-1/2 -translate-y-1/2 flex flex-col gap-2 z-40">
-      {/* Undo/Redo */}
+    <div className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 flex flex-col gap-2 z-40 scale-90 md:scale-100">
+      {/* Undo/Redo - Hidden on Mobile */}
       <motion.div 
         initial={{ x: -50, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ delay: 0.1 }}
-        className="bg-[#1e293b]/90 backdrop-blur-xl border border-white/10 rounded-2xl p-2 flex flex-col gap-1 shadow-2xl"
+        className="hidden md:flex bg-[#1e293b]/90 backdrop-blur-xl border border-white/10 rounded-2xl p-2 flex-col gap-1 shadow-2xl"
       >
         <button 
           onClick={undo}
